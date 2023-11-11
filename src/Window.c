@@ -22,6 +22,10 @@
 #include "crt.h"
 #include "Engine.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 static SDL_Window*   window;
 static SDL_Renderer* renderer;
 static SDL_Texture*	 backbuffer;
@@ -1091,6 +1095,27 @@ void TLN_SetWindowScaleFactor(int factor)
 	flags.value = wnd_params.flags;
 	flags.factor = factor;
 	wnd_params.flags = flags.value;
+}
+
+static void emscripten_main_loop(void)
+{
+	TLN_ProcessWindow();
+	if (frametask != NULL)
+		frametask(frame);
+	TLN_DrawFrame(frame);
+	frame += 1;
+}
+
+void TLN_SetMainTask(TLN_TaskCallback task)
+{
+	frametask = task;
+
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop(emscripten_main_loop, 0, 1);
+#else
+	while (!done)
+		emscripten_main_loop();
+#endif
 }
 
 #endif
