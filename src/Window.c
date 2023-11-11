@@ -47,6 +47,7 @@ static char*		 window_title;
 
 static int			last_key;
 static TLN_SDLCallback sdl_callback = NULL;
+static TLN_TaskCallback frametask = NULL;
 
 /* player input */
 typedef struct
