@@ -1104,7 +1104,7 @@ static void emscripten_main_loop(void)
 	if (frametask != NULL)
 		frametask(frame);
 	TLN_DrawFrame(frame);
-	frame += 1;
+	engine->frame += 1;
 }
 
 void TLN_SetMainTask(TLN_TaskCallback task)
