@@ -295,6 +295,7 @@ typedef union SDL_Event SDL_Event;
 typedef void(*TLN_VideoCallback)(int scanline);
 typedef uint8_t(*TLN_BlendFunction)(uint8_t src, uint8_t dst);
 typedef void(*TLN_SDLCallback)(SDL_Event*);
+typedef void(*TLN_TaskCallback)(uint32_t frame);
 
 /*! Player index for input assignment functions */
 typedef enum
@@ -471,6 +472,7 @@ TLNAPI int TLN_GetWindowWidth(void);
 TLNAPI int TLN_GetWindowHeight(void);
 TLNAPI int TLN_GetWindowScaleFactor(void);
 TLNAPI void TLN_SetWindowScaleFactor(int);
+TLNAPI void TLN_SetMainTask(TLN_TaskCallback);
 /**@}*/
 
 /**
