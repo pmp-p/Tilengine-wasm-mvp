@@ -1,4 +1,4 @@
-/*
+ne/*
 * Tilengine - The 2D retro graphics engine with raster effects
 * Copyright (C) 2015-2019 Marc Palacios Domenech <mailto:megamarc@hotmail.com>
 * All rights reserved
@@ -1112,8 +1112,8 @@ static void emscripten_main_loop(void)
 	flags.value = wnd_params.flags;
 	if(flags.novsync)
 	{
-		Engine* context = TLN_GetContext();
-		float targetFrameTime = 1000.0 / (float)(context->targetFPS);
+		//Engine* context = TLN_GetContext();
+		float targetFrameTime = 1000.0 / (float)(engine->target_fps);
 		if(delta < targetFrameTime)
 			SDL_Delay((uint32_t)(targetFrameTime - delta));
 		return;
