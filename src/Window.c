@@ -1110,10 +1110,11 @@ static void emscripten_main_loop(void)
 	float delta = (float)end - (float)start;
 	WindowFlags flags;
 	flags.value = wnd_params.flags;
-	if(flags.novsync)
+	uint32_t fps = TLN_GetTargetFps();
+	if(flags.novsync && fps > 0)
 	{
 		//Engine* context = TLN_GetContext();
-		float targetFrameTime = 1000.0 / (float)(engine->target_fps);
+		float targetFrameTime = 1000.0 / (float)(fps);
 		if(delta < targetFrameTime)
 			SDL_Delay((uint32_t)(targetFrameTime - delta));
 		return;
