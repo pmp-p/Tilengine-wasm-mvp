@@ -1108,7 +1108,8 @@ static void emscripten_main_loop(void)
 	engine->frame += 1;
 	uint32_t end = SDL_GetTicks();
 	float delta = (float)end - (float)start;
-	WindowFlags flags = wnd_params.flags;
+	WindowFlags flags;
+	flags.value =  = wnd_params.flags
 	if(flags.novsync)
 	{
 		Engine* context = TLN_GetContext();
