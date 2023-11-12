@@ -1100,11 +1100,25 @@ void TLN_SetWindowScaleFactor(int factor)
 
 static void emscripten_main_loop(void)
 {
+	uint32_t start = SDL_GetTicks();
 	TLN_ProcessWindow();
 	if (frametask != NULL)
 		frametask(engine->frame);
 	TLN_DrawFrame(engine->frame);
 	engine->frame += 1;
+	uint32_t end = SDL_GetTicks();
+	float delta = (float)end - (float)start;
+	if(wnd_params.flags.novsync)
+	{
+		Engine* context = TLN_GetContext();
+		float targetFrameTime = 1000.0 / (float)(context->targetFPS);
+		if(delta < targetFrameTime)
+			SDL_delay((uint32_t)(targetFrameTime - delta));
+		return;
+	}
+	float targetFrameTime = 1000.0 / 60.0;
+	if(delta < targetFrameTime)
+		SDL_delay((uint32_t)(targetFrameTime - delta));
 }
 
 void TLN_SetMainTask(TLN_TaskCallback task)
