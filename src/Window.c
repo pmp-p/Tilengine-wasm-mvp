@@ -1108,17 +1108,18 @@ static void emscripten_main_loop(void)
 	engine->frame += 1;
 	uint32_t end = SDL_GetTicks();
 	float delta = (float)end - (float)start;
-	if(wnd_params.flags.novsync)
+	WindowFlags flags = wnd_params.flags;
+	if(flags.novsync)
 	{
 		Engine* context = TLN_GetContext();
 		float targetFrameTime = 1000.0 / (float)(context->targetFPS);
 		if(delta < targetFrameTime)
-			SDL_delay((uint32_t)(targetFrameTime - delta));
+			SDL_Delay((uint32_t)(targetFrameTime - delta));
 		return;
 	}
 	float targetFrameTime = 1000.0 / 60.0;
 	if(delta < targetFrameTime)
-		SDL_delay((uint32_t)(targetFrameTime - delta));
+		SDL_Delay((uint32_t)(targetFrameTime - delta));
 }
 
 void TLN_SetMainTask(TLN_TaskCallback task)
