@@ -37,12 +37,23 @@ jobs:
             sudo apt-get install -y bash git cmake curl wget lz4 pv 2>&1 >/dev/null
 
 
-    - name: build 3.11 packages
+    - name: install python-wasm-sdk
+      run: |
+        sudo apt-get install -y lz4 wget pv
+        echo https://github.com/pygame-web/python-wasm-sdk/releases/download/$SDK_VERSION/$SDK_ARCHIVE
+        curl -sL --retry 5 https://github.com/pygame-web/python-wasm-sdk/releases/download/$SDK_VERSION/$SDK_ARCHIVE | tar xvP --use-compress-program=lz4 | pv -p -l -s 24400 >/dev/null
+        curl https://wasmtime.dev/install.sh -sSf | bash
+        mkdir -p /opt/python-wasm-sdk/wasisdk/bin
+        mv -vf $(find $HOME/|grep /wasmtime$) /opt/python-wasm-sdk/wasisdk/bin/
+      working-directory: /opt
+
+
+    - name: build library and samples
       run: |
             cd $GITHUB_WORKSPACE
             PYBUILD=3.11 bash ./packages.d/tilengine/tilengine.sh
 
-    - name: publishing
+    - name: publish one sample
       run: |
             cd $GITHUB_WORKSPACE
             mv -v samples/platformer.* static/
