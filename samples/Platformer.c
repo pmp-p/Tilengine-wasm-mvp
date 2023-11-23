@@ -22,13 +22,22 @@
 #define lerp(x, x0,x1, fx0,fx1) \
 	fx0 + (fx1-fx0)*(x-x0)/(x1-x0)
 
+#if defined(__EMSCRIPTEN__)
+#   include "emscripten.h"
+#else
+    #define em_callback_func void
+    #define emscripten_set_main_loop(func, fps, simloop) { while(1) func(); }
+#endif
+
+#define HOST_RETURN_YIELD  return NULL
+
 typedef struct
 {
 	int r,g,b;
 }
 RGB;
 
-RGB sky[] = 
+RGB sky[] =
 {
 	{0x1B, 0x00, 0x8B},
 	{0x00, 0x74, 0xD7},
@@ -55,8 +64,6 @@ int ypos;
 static void raster_callback (int line);
 
 /* entry point */
-int main (int argc, char *argv[])
-{
 	int c;
 	TLN_Tilemap foreground;
 	TLN_Tilemap background;
@@ -64,6 +71,8 @@ int main (int argc, char *argv[])
 	TLN_Sequence sequence;
 	TLN_Palette palette;
 
+
+void begin() {
 	/* setup engine */
 	TLN_Init (WIDTH,HEIGHT, MAX_LAYER, 0, 1);
 	TLN_SetRasterCallback (raster_callback);
@@ -92,9 +101,13 @@ int main (int argc, char *argv[])
 
 	/* startup display */
 	TLN_CreateWindow (NULL, 0);
+}
 
+
+em_callback_func
+loop(void) {
 	/* main loop */
-	while (TLN_ProcessWindow ())
+	if (TLN_ProcessWindow ())
 	{
 		if (TLN_GetInput (INPUT_RIGHT))
 		{
@@ -108,7 +121,7 @@ int main (int argc, char *argv[])
 			if (speed < 0.0f)
 				speed = 0.0f;
 		}
-			 
+
 		if (TLN_GetInput (INPUT_LEFT))
 		{
 			speed -= 0.02f;
@@ -130,23 +143,43 @@ int main (int argc, char *argv[])
 
 		/* render to window */
 		TLN_DrawFrame (0);
-	}
 
+        // yield
+
+	} else {
+        // or maybe terminate
+        // emscripten_cancel_main_loop();
+    }
+    HOST_RETURN_YIELD;
+}
+
+void end() {
 	/* deinit */
 	TLN_DeleteTilemap (foreground);
 	TLN_DeleteTilemap (background);
 	TLN_DeleteSequencePack (sp);
 	TLN_Deinit ();
-
-	return 0;
 }
+
+int main (int argc, char *argv[])
+{
+    puts("begin");
+    begin();
+    puts("loop-w");
+    emscripten_set_main_loop( (em_callback_func)loop, 0, 1);
+
+// unreachable
+    puts("end");
+    end();
+}
+
 
 /* raster callback (virtual HBLANK) */
 static void raster_callback (int line)
 {
 	float pos =- 1;
 	RGB color;
-	
+
 	if (line==0)
 		pos = pos_background[0];
 	else if (line==32)
@@ -162,18 +195,18 @@ static void raster_callback (int line)
 
 	if (pos != -1)
 		TLN_SetLayerPosition (LAYER_BACKGROUND, (int)pos, 0);
-	
+
 	/* background color gradients */
 	if (line < 112)
 	{
 		InterpolateColor (line, 0,112, &sky[0], &sky[1], &color);
 		TLN_SetBGColor (color.r, color.g, color.b);
-	}	
+	}
 	else if (line >= 144)
 	{
 		InterpolateColor (line, 144,HEIGHT, &sky[2], &sky[3], &color);
 		TLN_SetBGColor (color.r, color.g, color.b);
-	}		
+	}
 }
 
 static void InterpolateColor (int v, int v1, int v2, RGB* color1, RGB* color2, RGB* result)
