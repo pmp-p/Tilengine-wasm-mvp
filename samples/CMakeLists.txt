@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 project(samples)
 
 
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
 	set(CMAKE_C_FLAGS "-m64 -msse2")
 elseif (UNIX AND APPLE)
     link_libraries("framework")
@@ -18,12 +18,19 @@ link_libraries("m")
 find_package(SDL2 REQUIRED)
 link_libraries(${SDL2_LIBRARIES})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O2 -fpic -DLIB_EXPORTS")
+if (EMSCRIPTEN)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Os -g0 -fpic -DLIB_EXPORTS --preload-file assets@assets")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O0 -g3 -fpic -DLIB_EXPORTS")
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result -Wno-format-truncation")
+
 
 file(COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(barrel 
+add_executable(barrel
      Barrel.c
      Simon.c)
 

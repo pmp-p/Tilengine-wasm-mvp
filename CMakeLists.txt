@@ -12,7 +12,7 @@ file(GLOB SOURCES
 list(REMOVE_ITEM SOURCES "src/Test.c")
 add_library(${PROJECT_NAME} ${SOURCES})
 
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
 	set(CMAKE_C_FLAGS "-m64 -msse2")
 elseif (UNIX AND APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "framework")

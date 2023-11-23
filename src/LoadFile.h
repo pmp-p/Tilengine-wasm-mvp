@@ -21,8 +21,8 @@
 typedef SSIZE_T ssize_t;
 #else
 #include <strings.h>
-#ifdef __linux__
-#include <sys/types.h> // ssize_t
+#if defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__wasi__)
+#   include <sys/types.h> // ssize_t
 #endif
 #endif
 

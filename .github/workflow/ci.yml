@@ -1,0 +1,56 @@
+name: CI
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+        SDK_VERSION: 3.1.50.1bi
+        SYS_PYTHON: /usr/bin/python3
+        PACKAGES: emsdk hpy _ctypes pygame
+        BUILD_STATIC: emsdk _ctypes hpy
+        STATIC: false
+        BUILDS: 3.11 3.12
+        CYTHON: Cython-3.0.5-py2.py3-none-any.whl
+        LD_VENDOR: -sUSE_GLFW=3
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+    - name: pygame-wasm-builder prepare
+      run: |
+            pwd
+            echo
+            python3 -V
+            echo
+            clang --version | head -n 1
+            echo
+            gcc --version | head -n 1
+            echo
+            echo CI=$CI
+            echo
+            env|grep GITHUB
+            echo
+            env|grep ANDROID
+            echo
+            sudo apt-get update 2>&1 >/dev/null
+            sudo apt-get install -y bash git cmake curl wget lz4 pv 2>&1 >/dev/null
+
+
+    - name: build 3.11 packages
+      run: |
+            cd $GITHUB_WORKSPACE
+            PYBUILD=3.11 bash ./packages.d/tilengine/tilengine.sh
+
+    - name: publishing
+      run: |
+            cd $GITHUB_WORKSPACE
+            mv -v samples/platformer.* static/
+
+
+    - name : "Upload to GitHub pages"
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+        branch: gh-pages
+        folder: static
+
